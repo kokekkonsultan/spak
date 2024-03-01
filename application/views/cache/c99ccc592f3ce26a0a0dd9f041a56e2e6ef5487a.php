@@ -1,0 +1,205 @@
+<?php
+$ci = get_instance();
+?>
+
+<?php $__env->startSection('style'); ?>
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('content'); ?>
+
+<div class="container-fluid">
+    <?php echo $__env->make("include_backend/partials_no_aside/_inc_menu_repository", \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+
+    <div class="row mt-5">
+        <div class="col-md-3">
+            <?php echo $__env->make('manage_survey/menu_data_survey', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+        </div>
+        <div class="col-md-9">
+
+            <div class="card card-custom bgi-no-repeat gutter-b"
+                style="height: 150px; background-color: #1c2840; background-position: calc(100% + 0.5rem) 100%; background-size: 100% auto; background-image: url(/assets/img/banner/taieri.svg)"
+                data-aos="fade-down">
+                <div class="card-body d-flex align-items-center">
+                    <div>
+                        <h3 class="text-white font-weight-bolder line-height-lg mb-5">
+                        <?php echo e(strtoupper($title)); ?>
+
+                        </h3>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-5">
+				<div class="card-body">
+
+					<div>
+						<div id="chart-container">FusionCharts XT will load here!</div>
+					</div>
+					<table width="466" border="1" class="table table-bordered">
+						<tr>
+						  <td width="233"><strong>Nama Survei Yang Dilakukan</strong></td>
+						  <td width="233"><?php echo e($manage_survey->survey_name); ?> </td>
+						</tr>
+						<tr>
+						  <td><strong>Responden</strong></td>
+						  <td><?php echo e($jumlah_kuisioner); ?></td>
+						</tr>
+                        <?php
+                        $new_cart = '';
+                        $indeks = 0;
+                        $i = 0;
+                        ?>
+                        <?php $__currentLoopData = $layanan->result(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
+                        $nilai_tertimbang = 0;
+                        $nilai_bobot_chart[] = '';
+                        $i++;
+
+                        //$id_layanan_survei = implode(", ", unserialize($value->id_layanan_survei));
+
+                        $ci->db->select("nama_unsur_pelayanan, IF(id_parent = 0,unsur_pelayanan_$table_identity.id, unsur_pelayanan_$table_identity.id_parent) AS id_sub, (SUM(skor_jawaban)/COUNT(DISTINCT survey_$table_identity.id_responden)) AS rata_rata,  (COUNT(id_parent)/COUNT(DISTINCT survey_$table_identity.id_responden)) AS colspan, ((SUM(skor_jawaban)/COUNT(DISTINCT survey_$table_identity.id_responden))/(COUNT(id_parent)/COUNT(DISTINCT survey_$table_identity.id_responden))) AS nilai, (((SUM(skor_jawaban)/COUNT(DISTINCT survey_$table_identity.id_responden))/(COUNT(id_parent)/COUNT(DISTINCT survey_$table_identity.id_responden)))/(SELECT COUNT(id) FROM unsur_pelayanan_$table_identity WHERE id_parent = 0)) AS rata_rata_bobot");
+                        $ci->db->from('jawaban_pertanyaan_unsur_' . $table_identity);
+                        $ci->db->join("pertanyaan_unsur_pelayanan_$table_identity", "jawaban_pertanyaan_unsur_$table_identity.id_pertanyaan_unsur = pertanyaan_unsur_pelayanan_$table_identity.id");
+                        $ci->db->join("unsur_pelayanan_$table_identity", "pertanyaan_unsur_pelayanan_$table_identity.id_unsur_pelayanan = unsur_pelayanan_$table_identity.id");
+                        $ci->db->join("survey_$table_identity", "jawaban_pertanyaan_unsur_$table_identity.id_responden = survey_$table_identity.id_responden");
+                        $ci->db->join("responden_$table_identity", "responden_$table_identity.id = survey_$table_identity.id_responden");
+                        $ci->db->where("survey_$table_identity.is_submit = 1");
+                        //$ci->db->where("responden_$table_identity.id_layanan_survei = $value->id");
+                        $ci->db->group_by('id_sub');
+
+                        /*$ci->db->select("nama_unsur_pelayanan, IF(id_parent = 0,unsur_pelayanan_$table_identity.id, unsur_pelayanan_$table_identity.id_parent) AS id_sub, (SUM(skor_jawaban)/COUNT(DISTINCT survey_$table_identity.id_responden)) AS rata_rata,  (COUNT(id_parent)/COUNT(DISTINCT survey_$table_identity.id_responden)) AS colspan, ((SUM(skor_jawaban)/COUNT(DISTINCT survey_$table_identity.id_responden))/(COUNT(id_parent)/COUNT(DISTINCT survey_$table_identity.id_responden))) AS nilai, (((SUM(skor_jawaban)/COUNT(DISTINCT survey_$table_identity.id_responden))/(COUNT(id_parent)/COUNT(DISTINCT survey_$table_identity.id_responden)))/(SELECT COUNT(id) FROM unsur_pelayanan_$table_identity WHERE id_parent = 0)) AS rata_rata_bobot");
+		                $ci->db->from('jawaban_pertanyaan_unsur_' . $table_identity);
+		                $ci->db->join("pertanyaan_unsur_pelayanan_$table_identity", "jawaban_pertanyaan_unsur_$table_identity.id_pertanyaan_unsur = pertanyaan_unsur_pelayanan_$table_identity.id");
+		                $ci->db->join("unsur_pelayanan_$table_identity", "pertanyaan_unsur_pelayanan_$table_identity.id_unsur_pelayanan = unsur_pelayanan_$table_identity.id");
+		                $ci->db->join("survey_$table_identity", "jawaban_pertanyaan_unsur_$table_identity.id_responden = survey_$table_identity.id_responden");
+                        $ci->db->join("responden_$table_identity", "responden_$table_identity.id = survey_$table_identity.id_responden");
+		                $ci->db->where("survey_$table_identity.is_submit = 1");
+                        //$ci->db->where("responden_$table_identity.id_layanan_survei = $value->id");
+                        //$ci->db->where("responden_$table_identity.id_layanan_survei = 'a:1:{i:0;s:1:".$value->id.";}'");
+                        //$ci->db->where("responden_$table_identity.id_layanan_survei like  '%s%s%s%".$value->id."%'");
+		                $ci->db->group_by('id_sub');*/
+
+                        
+                        
+                        $rata_rata_bobot_query = $ci->db->get();
+
+                        foreach ($rata_rata_bobot_query->result() as $rata_rata_bobot) {
+                            //$nilai_bobot_chart[] = $rata_rata_bobot->rata_rata_bobot;
+                            //$nilai_tertimbang = array_sum($nilai_bobot_chart);
+                            //$nilai_bobot_chart[] = $rata_rata_bobot->nama_unsur_pelayanan. ' = ' .$rata_rata_bobot->rata_rata_bobot;
+                            $nilai_tertimbang += $rata_rata_bobot->rata_rata_bobot;
+                        }
+                        //$nilai_indekssss = implode("<br>", $nilai_bobot_chart);
+                        //$nilai_indekssss = '';
+
+                        if($i!=1){ $new_cart .= ','; }
+                        $new_cart .= '{
+                            "label": "'.$value->nama_layanan.'",
+                            "value": "'.ROUND($nilai_tertimbang, 3).'"
+                        }';
+
+                        $indeks += $nilai_tertimbang;
+                        ?>
+                        <tr>
+						  <td><strong><?php echo e($value->nama_layanan); ?></strong></td>
+						  <td><?php echo e(ROUND($nilai_tertimbang, 3)); ?></td>
+						</tr>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+						
+                        <?php
+                        $nilai_indeks = $indeks/$i;
+                        ?>
+						<tr>
+						  <td><strong>Indeks</strong></td>
+						  <td><?php echo e(ROUND($nilai_indeks, 3)); ?></td>
+						</tr>
+					  </table>
+
+					  <div>
+						disclaimer : indeks perlayanan hanya sebagai gambaran, tidak dilakukan penelitian khusus untuk layanan tersebut
+					  </div>
+				</div>
+			</div>
+
+
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('javascript'); ?>
+
+<script src="https://cdn.fusioncharts.com/fusioncharts/latest/fusioncharts.js"></script>
+<script src="<?php echo e(base_url()); ?>assets/vendor/fusioncharts-suite-xt/js/themes/fusioncharts.theme.accessibility.js">
+</script>
+<script src="<?php echo e(base_url()); ?>assets/vendor/fusioncharts-suite-xt/js/themes/fusioncharts.theme.candy.js"></script>
+<script src="<?php echo e(base_url()); ?>assets/vendor/fusioncharts-suite-xt/js/themes/fusioncharts.theme.carbon.js"></script>
+<script src="<?php echo e(base_url()); ?>assets/vendor/fusioncharts-suite-xt/js/themes/fusioncharts.theme.fint.js"></script>
+<script src="<?php echo e(base_url()); ?>assets/vendor/fusioncharts-suite-xt/js/themes/fusioncharts.theme.fusion.js"></script>
+<script src="<?php echo e(base_url()); ?>assets/vendor/fusioncharts-suite-xt/js/themes/fusioncharts.theme.gammel.js"></script>
+<script src="<?php echo e(base_url()); ?>assets/vendor/fusioncharts-suite-xt/js/themes/fusioncharts.theme.ocean.js"></script>
+<script src="<?php echo e(base_url()); ?>assets/vendor/fusioncharts-suite-xt/js/themes/fusioncharts.theme.umber.js"></script>
+<script src="<?php echo e(base_url()); ?>assets/vendor/fusioncharts-suite-xt/js/themes/fusioncharts.theme.zune.js"></script>
+
+
+<style type="text/css">
+[pointer-events="bounding-box"] {
+    display: none
+}
+</style>
+    
+
+<script type="text/javascript">
+    //STEP 2 - Chart Data
+    /*const chartData = [{
+        "label": "Indeks Layanan A",
+        "value": "3.1"
+    }, {
+        "label": "Indeks Layanan B",
+        "value": "3.2"
+    }];*/
+    const chartData = [<?php echo $new_cart; ?>];
+    
+    //STEP 3 - Chart Configurations
+    const chartConfig = {
+    type: 'bar3d',//column3d
+    renderAt: 'chart-container',
+    width: '100%',
+    height: '500',
+    dataFormat: 'json',
+    dataSource: {
+        // Chart Configuration
+        "chart": {
+            "caption": "<?php echo e($manage_survey->survey_name); ?>",
+            "subCaption": "Grafik per layanan yang disurvei",
+            "xAxisName": "Layanan yang disurvei",
+            "yAxisName": "Nilai Indeks",
+            "numberSuffix": "",
+			"showValues": "1",
+          	"rotateValues": "0",
+			"valueFont": "Arial",
+			"valueFontColor": "#5d62b5",
+			"valueFontSize": "12",
+			"valueFontBold": "1",
+            "theme": "fusion"//gammel
+            },
+        // Chart Data
+        "data": chartData
+        }
+    };
+    FusionCharts.ready(function(){
+    var fusioncharts = new FusionCharts(chartConfig);
+    fusioncharts.render();
+    });
+
+</script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('include_backend/template_backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\IT\Documents\Htdocs MAMP\surveiku_spak\application\views/rekapitulasi_indeks_per_pelayanan/index.blade.php ENDPATH**/ ?>
